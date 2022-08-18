@@ -176,7 +176,7 @@ export default class Compressor {
     /**
      *
      * @public
-     * @description Handler for the video compress
+     * @description Run the compression
      * @returns {Promise<import("./types/HandleResult").default>}
      */
     run() {
