@@ -34,21 +34,21 @@ export default class Compressor {
 
     /**
      * @private
-     * @description Video compression mode
-     * @type {?('low' | 'medium' | 'high' | 'ultra')}
+     * @description Video compression preset
+     * @type {?('low' | 'medium' | 'high' | 'veryHigh' | 'ultra')}
      */
-    #mode = null;
+    #preset = null;
 
     /**
      *
      * @constructor
      * @param {import("./types/IOptions").default} options
      */
-    constructor({ input, output, codec, mode }) {
+    constructor({ input, output, codec, preset }) {
         this.#input = input;
         this.#output = output;
         this.#codec = codec;
-        this.#mode = mode;
+        this.#preset = preset;
 
         this.#setupFfmpeg();
     }
@@ -85,18 +85,20 @@ export default class Compressor {
     /**
      *
      * @private
-     * @description Get the bitrate multiplier
+     * @description Get the bitrate divider
      * @returns {number}
      */
-    #getBitrateMultiplier() {
-        if (this.#mode === 'low') {
-            return 10;
-        } else if (this.#mode === 'medium') {
-            return 7;
-        } else if (this.#mode === 'high') {
-            return 4;
-        } else if (this.#mode === 'ultra') {
-            return 2;
+    #getBitrateDivider() {
+        if (this.#preset === 'low') {
+            return 1.6;
+        } else if (this.#preset === 'medium') {
+            return 2.4;
+        } else if (this.#preset === 'high') {
+            return 3.2;
+        } else if (this.#preset === 'veryHigh') {
+            return 4.3;
+        } else if (this.#preset === 'ultra') {
+            return 5.1;
         }
     }
 
@@ -104,17 +106,11 @@ export default class Compressor {
      *
      * @private
      * @description Get video bitrate from bytes
-     * @param {number} bytes
+     * @param {number} bitrate
      * @returns {number}
      */
-    #getBitrate(bytes) {
-        const diff = Math.floor(bytes / 1000000);
-
-        if (diff < 10) {
-            return Math.floor(128 * this.#getBitrateMultiplier());
-        } else {
-            return Math.floor(diff * 12 * this.#getBitrateMultiplier());
-        }
+    #getBitrate(bitrate) {
+        return Math.floor(bitrate / this.#getBitrateDivider());
     }
 
     /**
@@ -139,9 +135,9 @@ export default class Compressor {
      */
     #getOutputOptions() {
         if (this.#codec === 'h264') {
-            return ['-preset slow', '-c:a aac', `-c:v ${this.#getCodec()}`];
+            return [`-c:v ${this.#getCodec()}`, '-preset slow'];
         } else if (this.#codec === 'h265') {
-            return ['-preset slow', '-c:a aac', `-c:v ${this.#getCodec()}`];
+            return [`-c:v ${this.#getCodec()}`, '-preset slow'];
         }
     }
 
@@ -155,13 +151,24 @@ export default class Compressor {
     #compress(bitrate) {
         return new Promise((resolve, reject) => {
             ffmpeg(this.#input)
-                .outputOptions([...this.#getOutputOptions(), `-b:v ${bitrate}k`])
+                .outputOptions([...this.#getOutputOptions(), `-b:v ${bitrate}`])
                 .output(this.#output)
                 .on('start', () => {
-                    console.log('Compressing...');
+                    console.log('Compress started.');
                 })
                 .on('error', (err) => reject(err))
                 .on('end', () => resolve())
+                .on('progress', (progress) => {
+                    console.clear();
+                    console.log('Compressing...\n');
+                    console.log(
+                        `Frames: ${progress.frames} | FPS: ${
+                            progress.currentFps
+                        } | Bitrate: ${Math.floor(
+                            progress.currentKbps
+                        )} | Completion: ${progress.percent.toFixed(2)}%`
+                    );
+                })
                 .run();
         });
     }
@@ -172,11 +179,11 @@ export default class Compressor {
      * @description Handler for the video compress
      * @returns {Promise<import("./types/HandleResult").default>}
      */
-    handle() {
+    run() {
         return new Promise(async (resolve, reject) => {
             try {
                 const inputMetadata = await this.#extractMetadata(this.#input);
-                const bitrate = this.#getBitrate(inputMetadata.format.size);
+                const bitrate = this.#getBitrate(inputMetadata.format.bit_rate);
 
                 await this.#compress(bitrate);
 
