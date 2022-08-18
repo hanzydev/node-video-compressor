@@ -1,0 +1,21 @@
+{
+    "name": "node-compressor",
+    "version": "1.0.0",
+    "description": "Compressor for Node.js with using ffmpeg.",
+    "main": "src/index.js",
+    "repository": "https://github.com/deliever42/node-compressor",
+    "author": "deliever42",
+    "dependencies": {
+        "@ffmpeg-installer/ffmpeg": "^1.1.0",
+        "ffprobe-static": "^3.1.0",
+        "filesize": "^9.0.11",
+        "fluent-ffmpeg": "^2.1.2"
+    },
+    "devDependencies": {
+        "prettier": "^2.7.1"
+    },
+    "scripts": {
+        "test": "node test/index.js"
+    },
+    "type": "module"
+}
