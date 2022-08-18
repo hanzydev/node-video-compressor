@@ -108,15 +108,12 @@ export default class Compressor {
      * @returns {number}
      */
     #getBitrate(bytes) {
-        const oneMB = 1000000;
-        const bit = 28;
-
-        const diff = Math.floor(bytes / oneMB);
+        const diff = Math.floor(bytes / 1000000);
 
         if (diff < 10) {
-            return 128 * diff * this.#getBitrateMultiplier();
+            return Math.floor(128 * this.#getBitrateMultiplier());
         } else {
-            return Math.floor(diff * bit * 1.1);
+            return Math.floor(diff * 12 * this.#getBitrateMultiplier());
         }
     }
 
