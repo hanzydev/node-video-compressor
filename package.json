@@ -1,7 +1,7 @@
 {
-    "name": "node-compressor",
+    "name": "node-video-compressor",
     "version": "1.0.0",
-    "description": "Compressor for Node.js with using ffmpeg.",
+    "description": "A video compressor for Node.js with using ffmpeg.",
     "main": "src/index.js",
     "repository": "https://github.com/deliever42/node-compressor",
     "author": "deliever42",
