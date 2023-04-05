@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "description": "A video compressor for Node.js with using ffmpeg.",
     "main": "src/index.js",
-    "repository": "https://github.com/deliever42/node-video-compressor",
-    "author": "deliever42",
+    "repository": "https://github.com/hanzydev/node-video-compressor",
+    "author": "hanzydev",
     "dependencies": {
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "ffprobe-static": "^3.1.0",
